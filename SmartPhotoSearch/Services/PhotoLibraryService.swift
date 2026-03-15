@@ -14,7 +14,6 @@ class PhotoLibraryService: PhotoLibraryServiceProtocol {
         }
     }
     
-    
     func fetchAssets(limit: Int = 500) -> [PHAsset] {
         var assets: [PHAsset] = []
         
@@ -22,6 +21,7 @@ class PhotoLibraryService: PhotoLibraryServiceProtocol {
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         
         let fetchResult: PHFetchResult<PHAsset> = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        
         let count = min(fetchResult.count, limit)
         
         for i in 0..<count {
