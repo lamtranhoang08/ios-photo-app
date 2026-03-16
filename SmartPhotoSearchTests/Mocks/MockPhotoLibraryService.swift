@@ -8,6 +8,7 @@
 
 import Photos
 @testable import SmartPhotoSearch
+import UIKit
 
 class MockPhotoLibraryService: PhotoLibraryServiceProtocol {
     
@@ -29,5 +30,8 @@ class MockPhotoLibraryService: PhotoLibraryServiceProtocol {
         fetchAssetsCallCount += 1
         lastFetchLimit = limit
         return assetsToReturn
+    }
+    
+    func presentLimitedLibraryPicker(from viewController: UIViewController) {
     }
 }
