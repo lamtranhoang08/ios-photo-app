@@ -1,3 +1,10 @@
+//
+//  PhotoLibraryService.swift
+//  SmartPhotoSearch
+//
+//  Created by Lâm Trần on 14/3/26.
+//
+
 import Photos
 import UIKit
 
