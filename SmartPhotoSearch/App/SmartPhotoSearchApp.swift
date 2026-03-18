@@ -1,5 +1,5 @@
 //
-//  SmartPhotoSearchApp.swift
+//  App/SmartPhotoSearchApp.swift
 //  SmartPhotoSearch
 //
 //  Created by Lâm Trần on 13/3/26.
@@ -10,13 +10,13 @@ import FirebaseCore
 
 @main
 struct SmartPhotoSearchApp: App {
+    // AppDelegate to handle background session callback
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
-    init() {
-        FirebaseApp.configure()
-    }
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
     }
 }
+

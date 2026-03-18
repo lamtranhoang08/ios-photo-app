@@ -106,6 +106,7 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
                     case .success(let url):
                         self?.uploadStatuses[id] = .done(downloadURL: url)
                     case .failure(let error):
+                        print("Upload failed for \(id): \(error.localizedDescription)")
                         self?.uploadStatuses[id] = .failed(error: error.localizedDescription)
                     }
                 }
