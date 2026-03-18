@@ -11,4 +11,9 @@ enum UploadStatus: Equatable {
     case uploading(progress: Double)
     case done(downloadURL: String)
     case failed(error: String)
+    
+    var isUploaded: Bool {
+          if case .done = self { return true }
+          return false
+      }
 }

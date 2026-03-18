@@ -10,6 +10,8 @@ import SwiftUI
 import UIKit
 import Combine
 import Photos
+import Firebase
+import FirebaseCore
 
 @MainActor
 class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserver {
@@ -19,6 +21,8 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
     @Published var permissionDenied: Bool = false
     @Published var isLimited: Bool = false //new
     @Published var uploadStatuses: [String: UploadStatus] = [:]
+    @Published var isSelectionMode: Bool = false
+    @Published var selectedAssetIDs: Set<String> = []
     
     private let photoService: PhotoLibraryServiceProtocol
     private let uploadService: UploadServiceProtocol
@@ -49,9 +53,11 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
         case .authorized:
             isLimited = false
             loadAssets()
+            syncUploadStatuses()
         case .limited:
             isLimited = true
             loadAssets()
+            syncUploadStatuses()
         case .notDetermined:
             photoService.requestPhotoPermission { [weak self] granted in
                 if granted { self?.loadPhotos() }
@@ -61,6 +67,29 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
             // TODO: Show a UI alert directing user to Settings
             break
         @unknown default: break
+        }
+    }
+    
+    func syncUploadStatuses() {
+        let db = Firestore.firestore()
+        
+        db.collection("photos").getDocuments { [weak self] snapshot, error in
+            guard let self else { return }
+            
+            if let error {
+                print("Failed to sync upload statuses: \(error.localizedDescription)")
+                return
+            }
+            
+            Task { @MainActor in
+                snapshot?.documents.forEach { doc in
+                    let assetID = doc.data()["localIdentifier"] as? String ?? doc.documentID
+                        .replacingOccurrences(of: "_", with: "/")
+                    
+                    let downloadURL = doc.data()["downloadURL"] as? String ?? ""
+                    self.uploadStatuses[assetID] = .done(downloadURL: downloadURL)
+                }
+            }
         }
     }
     
@@ -89,6 +118,14 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
         }
     }
     
+    func uploadSelected() {
+        let toUpload = assets.filter { selectedAssetIDs.contains($0.localIdentifier) }
+        for asset in toUpload {
+            uploadAsset(asset)
+        }
+        toggleSelectionMode()
+    }
+    
     func uploadAsset(_ asset: PHAsset) {
         let id = asset.localIdentifier
         uploadStatuses[id] = .uploading(progress: 0.0)
@@ -114,4 +151,20 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
         )
     }
     
+    func toggleSelectionMode() {
+        isSelectionMode.toggle()
+        if !isSelectionMode {
+            selectedAssetIDs.removeAll()
+        }
+    }
+    
+    func toggleSelection(for asset: PHAsset) {
+        guard uploadStatuses[asset.localIdentifier]?.isUploaded != true else { return }
+        let id = asset.localIdentifier
+        if selectedAssetIDs.contains(id) {
+            selectedAssetIDs.remove(id)
+        } else {
+            selectedAssetIDs.insert(id)
+        }
+    }
 }
