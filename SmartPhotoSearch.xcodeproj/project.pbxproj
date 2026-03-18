@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D22FC6802F697C4E00A8805D /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D22FC67F2F697C4E00A8805D /* FirebaseAuth */; };
+		D22FC6822F697C5700A8805D /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = D22FC6812F697C5700A8805D /* FirebaseFirestore */; };
+		D22FC6842F697C5C00A8805D /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = D22FC6832F697C5C00A8805D /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E1C958622F63C8A00078F1E4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +35,22 @@
 		E1C9586B2F63C8A00078F1E4 /* SmartPhotoSearchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmartPhotoSearchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D22FC6462F693A0900A8805D /* Exceptions for "SmartPhotoSearch" folder in "SmartPhotoSearch" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E1C958532F63C89D0078F1E4 /* SmartPhotoSearch */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E1C958562F63C89D0078F1E4 /* SmartPhotoSearch */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D22FC6462F693A0900A8805D /* Exceptions for "SmartPhotoSearch" folder in "SmartPhotoSearch" target */,
+			);
 			path = SmartPhotoSearch;
 			sourceTree = "<group>";
 		};
@@ -52,6 +71,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D22FC6802F697C4E00A8805D /* FirebaseAuth in Frameworks */,
+				D22FC6822F697C5700A8805D /* FirebaseFirestore in Frameworks */,
+				D22FC6842F697C5C00A8805D /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +94,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D22FC67E2F697C4E00A8805D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E1C9584B2F63C89D0078F1E4 = {
 			isa = PBXGroup;
 			children = (
 				E1C958562F63C89D0078F1E4 /* SmartPhotoSearch */,
 				E1C958642F63C8A00078F1E4 /* SmartPhotoSearchTests */,
 				E1C9586E2F63C8A00078F1E4 /* SmartPhotoSearchUITests */,
+				D22FC67E2F697C4E00A8805D /* Frameworks */,
 				E1C958552F63C89D0078F1E4 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -112,6 +142,9 @@
 			);
 			name = SmartPhotoSearch;
 			packageProductDependencies = (
+				D22FC67F2F697C4E00A8805D /* FirebaseAuth */,
+				D22FC6812F697C5700A8805D /* FirebaseFirestore */,
+				D22FC6832F697C5C00A8805D /* FirebaseStorage */,
 			);
 			productName = SmartPhotoSearch;
 			productReference = E1C958542F63C89D0078F1E4 /* SmartPhotoSearch.app */;
@@ -195,6 +228,9 @@
 			);
 			mainGroup = E1C9584B2F63C89D0078F1E4;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D22FC67D2F697BC700A8805D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E1C958552F63C89D0078F1E4 /* Products */;
 			projectDirPath = "";
@@ -397,7 +433,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SmartPhotoSearch needs access to your photos to enable search.";
+				INFOPLIST_FILE = SmartPhotoSearch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "SmartPhotoSearch needs camera access to add new photos";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SmartPhotoSearch needs access to your photos to display and search them.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -429,7 +469,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SmartPhotoSearch needs access to your photos to enable search.";
+				INFOPLIST_FILE = SmartPhotoSearch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "SmartPhotoSearch needs camera access to add new photos";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SmartPhotoSearch needs access to your photos to display and search them.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -572,6 +616,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D22FC67D2F697BC700A8805D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D22FC67F2F697C4E00A8805D /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D22FC67D2F697BC700A8805D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		D22FC6812F697C5700A8805D /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D22FC67D2F697BC700A8805D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		D22FC6832F697C5C00A8805D /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D22FC67D2F697BC700A8805D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E1C9584C2F63C89D0078F1E4 /* Project object */;
 }

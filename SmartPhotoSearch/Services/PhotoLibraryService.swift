@@ -1,5 +1,5 @@
 //
-//  PhotoLibraryService.swift
+//  Services/PhotoLibraryService.swift
 //  SmartPhotoSearch
 //
 //  Created by Lâm Trần on 14/3/26.
@@ -7,14 +7,23 @@
 
 import Photos
 import UIKit
+import PhotosUI
 
 protocol PhotoLibraryServiceProtocol {
     func requestPhotoPermission(completion: @escaping (Bool) -> Void)
     func fetchAssets(limit: Int) -> [PHAsset]
+    
 }
+
 class PhotoLibraryService: PhotoLibraryServiceProtocol {
+    private let library: PHPhotoLibraryProtocol.Type
+    
+    init(library: PHPhotoLibraryProtocol.Type = LivePHPhotoLibrary.self) {
+        self.library = library
+    }
+    
     func requestPhotoPermission(completion: @escaping (Bool) -> Void) {
-        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+        library.requestAuthorization(for: .readWrite) { status in
             DispatchQueue.main.async {
                 completion(status == .authorized || status == .limited)
             }
@@ -37,4 +46,5 @@ class PhotoLibraryService: PhotoLibraryServiceProtocol {
         
         return assets
     }
+
 }
