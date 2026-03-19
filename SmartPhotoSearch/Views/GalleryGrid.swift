@@ -10,12 +10,14 @@ import Photos
 
 struct GalleryGrid: View {
     @ObservedObject var viewModel: GalleryViewModel
-
+    
     @State private var columnsCount: Int = 3
+    @State private var selectedAsset: PHAsset? = nil
+    
     let minColumns: Int = 1
     let maxColumns: Int = 6
     let spacing: CGFloat = 2
-
+    
     var body: some View {
         ScrollView {
             LazyVGrid(
@@ -34,10 +36,14 @@ struct GalleryGrid: View {
                         isSelectionMode: viewModel.isSelectionMode,
                         isSelected: viewModel.selectedAssetIDs.contains(asset.localIdentifier),
                         onTap: {
-                            guard !isUploaded else { return }
-                              if viewModel.isSelectionMode {
-                                  viewModel.toggleSelection(for: asset)
-                              }
+                            if viewModel.isSelectionMode {
+                                // selection mode — select/deselect
+                                guard !isUploaded else { return }
+                                viewModel.toggleSelection(for: asset)
+                            } else {
+                                // normal mode — open detail view
+                                selectedAsset = asset
+                            }
                         },
                         onLongPress: {
                             guard !isUploaded else { return }
@@ -47,6 +53,7 @@ struct GalleryGrid: View {
                             }
                         }
                     )
+                    
                 }
             }
             .padding(.horizontal, spacing)
@@ -63,5 +70,11 @@ struct GalleryGrid: View {
                     }
                 }
         )
+//        .navigationDestination(for: PHAsset.self) { asset in
+//            PhotoDetailView(asset: asset)
+//        }
+        .navigationDestination(item: $selectedAsset) { asset in
+                   PhotoDetailView(asset: asset)
+        }
     }
 }
