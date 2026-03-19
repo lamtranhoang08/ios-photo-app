@@ -32,7 +32,8 @@ class UploadService: UploadServiceProtocol {
         onProgress: @escaping (Double) -> Void,
         onComplete: @escaping (Result<String, Error>) -> Void
     ) {
-        extractImageData(from: asset) { result in
+        extractImageData(from: asset) { [weak self] result in
+            guard let self else { return }
             switch result {
             case .failure(let error):
                 onComplete(.failure(error))

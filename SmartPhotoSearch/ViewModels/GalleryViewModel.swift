@@ -7,11 +7,9 @@
 
 import Foundation
 import SwiftUI
-import UIKit
-import Combine
 import Photos
-import Firebase
-import FirebaseCore
+import FirebaseFirestore
+import Combine
 
 @MainActor
 class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserver {
@@ -70,6 +68,7 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
         }
     }
     
+    // TODO: Move Firestore access to PhotoRepository in Milestone 2
     func syncUploadStatuses() {
         let db = Firestore.firestore()
         
