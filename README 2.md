@@ -15,21 +15,21 @@ A production-quality iOS photo management app built with SwiftUI and Firebase. S
 ## Features
 
 ### Current (Milestone 1)
-- 📷 **Photo Library Browsing** — Lazy-loading grid with smooth scrolling
-- 🔍 **Pinch to Zoom Grid** — Dynamically resize from 1 to 6 columns
-- 🖼️ **Photo Detail View** — Full screen with pinch to zoom (1x–5x), drag to pan, double tap to reset
-- ☁️ **Firebase Upload Pipeline** — Upload photos to Firebase Storage with real-time progress
-- ✅ **Upload State Tracking** — Per-cell visual states (uploading, done, failed)
-- 🔲 **Multi-Select Mode** — Long press to enter selection mode, tap to select individual photos
-- 🔄 **Upload State Persistence** — Syncs upload status from Firestore on launch
-- 🔐 **Permission Handling** — Graceful handling of all PHAuthorizationStatus cases
-- 📦 **Limited Permission Flow** — Banner + expand picker for limited photo access
+- **Photo Library Browsing** — Lazy-loading grid with smooth scrolling
+- **Pinch to Zoom Grid** — Dynamically resize from 1 to 6 columns
+- **Photo Detail View** — Full screen with pinch to zoom (1x–5x), drag to pan, double tap to reset
+- **Firebase Upload Pipeline** — Upload photos to Firebase Storage with real-time progress
+- **Upload State Tracking** — Per-cell visual states (uploading, done, failed)
+- **Multi-Select Mode** — Long press to enter selection mode, tap to select individual photos
+- **Upload State Persistence** — Syncs upload status from Firestore on launch
+- **Permission Handling** — Graceful handling of all PHAuthorizationStatus cases
+- **Limited Permission Flow** — Banner + expand picker for limited photo access
 
 ### Coming Soon
-- 🏷️ **Auto-Tagging** — On-device object detection via Vision framework (Milestone 2)
-- 🔎 **Natural Language Search** — Search photos by content (Milestone 3)
-- 👤 **Face Clustering** — Automatic people albums via face embeddings (Milestone 4)
-- 📅 **Timeline Browsing** — Browse by year, month, day (Milestone 5)
+- **Auto-Tagging** — On-device object detection via Vision framework (Milestone 2)
+- **Natural Language Search** — Search photos by content (Milestone 3)
+- **Face Clustering** — Automatic people albums via face embeddings (Milestone 4)
+- **Timeline Browsing** — Browse by year, month, day (Milestone 5)
 
 ---
 
@@ -139,16 +139,18 @@ SmartPhotoSearch/
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/SmartPhotoSearch.git
+git clone https://github.com/lamtranhoang08/ios-photo-app.git
 cd SmartPhotoSearch
 ```
 
 2. **Firebase Setup**
-   - Create a project at [console.firebase.google.com](https://console.firebase.google.com)
-   - Add an iOS app with your bundle ID
-   - Download `GoogleService-Info.plist` and add to the project
-   - Enable **Firebase Storage** and **Firestore** in test mode
-   - Upgrade to Blaze plan (required for Storage)
+    This project requires Firebase. The `GoogleService-Info.plist` 
+    is not included for security reasons.
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com)
+2. Add an iOS app with bundle ID `Lam.SmartPhotoSearch`
+3. Download `GoogleService-Info.plist` and add to `SmartPhotoSearch/`
+4. Enable **Firebase Storage** and **Firestore** in test mode
+5. Upgrade to Blaze plan (required for Storage)
 
 3. **Open in Xcode**
 ```bash
@@ -194,13 +196,13 @@ Tests:       ViewModel → Protocol ← MockService (returns controlled data)
 
 This project is built to FAANG engineering standards:
 
-- ✅ **No retain cycles** — `[weak self]` throughout all closures
-- ✅ **Thread safety** — `actor` for shared mutable state
-- ✅ **Single responsibility** — every file has one job
-- ✅ **Dependency injection** — no singletons in business logic
-- ✅ **DRY** — no duplicated logic (e.g. `sanitize()` helper)
-- ✅ **Testable** — protocol-driven, fully mockable
-- ✅ **Memory safe** — `NSCache` with count and cost limits
+- **No retain cycles** — `[weak self]` throughout all closures
+- **Thread safety** — `actor` for shared mutable state
+- **Single responsibility** — every file has one job
+- **Dependency injection** — no singletons in business logic
+- **DRY** — no duplicated logic (e.g. `sanitize()` helper)
+- **Testable** — protocol-driven, fully mockable
+- **Memory safe** — `NSCache` with count and cost limits
 
 ---
 
@@ -208,11 +210,11 @@ This project is built to FAANG engineering standards:
 
 | Milestone | Status | Features |
 |-----------|--------|---------|
-| 1 — Trustworthy | ✅ Complete | Upload pipeline, permissions, grid |
-| 2 — Smart | 🔄 In Progress | Auto-tagging via Vision framework |
-| 3 — Searchable | ⬜ Planned | Natural language search |
-| 4 — Personal | ⬜ Planned | Face clustering, people albums |
-| 5 — Polished | ⬜ Planned | Timeline, shimmer, animations |
+| 1 — Trustworthy |  Complete | Upload pipeline, permissions, grid |
+| 2 — Smart |  In Progress | Auto-tagging via Vision framework |
+| 3 — Searchable | Planned | Natural language search |
+| 4 — Personal | Planned | Face clustering, people albums |
+| 5 — Polished |  Planned | Timeline, shimmer, animations |
 
 ---
 

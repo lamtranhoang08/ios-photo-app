@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D224222A2F6BBA7A0009A94B /* README 2.md in Resources */ = {isa = PBXBuildFile; fileRef = D22422292F6BBA7A0009A94B /* README 2.md */; };
 		D22FC6802F697C4E00A8805D /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D22FC67F2F697C4E00A8805D /* FirebaseAuth */; };
 		D22FC6822F697C5700A8805D /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = D22FC6812F697C5700A8805D /* FirebaseFirestore */; };
 		D22FC6842F697C5C00A8805D /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = D22FC6832F697C5C00A8805D /* FirebaseStorage */; };
@@ -30,6 +31,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D22422292F6BBA7A0009A94B /* README 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "README 2.md"; sourceTree = "<group>"; };
 		E1C958542F63C89D0078F1E4 /* SmartPhotoSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartPhotoSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C958612F63C8A00078F1E4 /* SmartPhotoSearchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmartPhotoSearchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C9586B2F63C8A00078F1E4 /* SmartPhotoSearchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmartPhotoSearchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +111,7 @@
 				E1C9586E2F63C8A00078F1E4 /* SmartPhotoSearchUITests */,
 				D22FC67E2F697C4E00A8805D /* Frameworks */,
 				E1C958552F63C89D0078F1E4 /* Products */,
+				D22422292F6BBA7A0009A94B /* README 2.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -248,6 +251,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D224222A2F6BBA7A0009A94B /* README 2.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
