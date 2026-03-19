@@ -1,0 +1,21 @@
+
+# Firebase — never commit this
+GoogleService-Info.plist
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+.DS_Store
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# CocoaPods (if used later)
+Pods/
+Podfile.lock
