@@ -27,69 +27,97 @@ struct PhotoDetailView: View {
     }
     
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            
-            if let img = loader.image {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFit()
-                    .ignoresSafeArea()
-                    .scaleEffect(scale)
-                    .offset(offset)
-                    .gesture(
-                        MagnificationGesture()
-                            .onChanged { value in
-                                let delta = value / lastScale
-                                lastScale = value
-                                scale = min(max(scale * delta, 1.0), 5.0) // clamp 1x to 5x
-                            }
-                            .onEnded { _ in
-                                lastScale = 1.0
-                                // Snap back if zoomed out below 1x
-                                if scale < 1.0 {
-                                    withAnimation(.spring()) {
-                                        scale = 1.0
-                                        offset = .zero
+        GeometryReader { geo in
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                if let img = loader.image {
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(
+                            width: geo.size.width,
+                            height: geo.size.height
+                        )
+                        .ignoresSafeArea()
+                        .scaleEffect(scale)
+                        .offset(offset)
+                        .gesture(
+                            MagnificationGesture()
+                                .onChanged { value in
+                                    let delta = value / lastScale
+                                    lastScale = value
+                                    scale = min(max(scale * delta, 1.0), 5.0) // clamp 1x to 5x
+                                }
+                                .onEnded { _ in
+                                    lastScale = 1.0
+                                    // Snap back if zoomed out below 1x
+                                    if scale < 1.0 {
+                                        withAnimation(.spring()) {
+                                            scale = 1.0
+                                            offset = .zero
+                                        }
                                     }
                                 }
+                        )
+                    // drag to pan when zoomed in
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    // Only allow panning when zoomed in
+                                    guard scale > 1.0 else { return }
+                                    offset = CGSize(
+                                        width: lastOffset.width + value.translation.width,
+                                        height: lastOffset.height + value.translation.height
+                                    )
+                                }
+                                .onEnded { _ in
+                                    lastOffset = offset
+                                    let maxX = (geo.size.width * (scale - 1)) / 2
+                                    let maxY = (geo.size.height * (scale - 1)) / 2
+                                    withAnimation(.spring()) {
+                                        offset = CGSize(
+                                            width: min(max(offset.width, -maxX), maxX),
+                                            height: min(max(offset.height, -maxY), maxY)
+                                        )
+                                        lastOffset = offset
+                                    }
+                                }
+                        )
+                    // double tap to reset zoom
+                        .onTapGesture(count: 2) {
+                            withAnimation(.spring()) {
+                                scale = 1.0
+                                offset = .zero
+                                lastOffset = .zero
                             }
-                    )
-                // drag to pan when zoomed in
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                // Only allow panning when zoomed in
-                                guard scale > 1.0 else { return }
-                                offset = CGSize(
-                                    width: lastOffset.width + value.translation.width,
-                                    height: lastOffset.height + value.translation.height
-                                )
-                            }
-                            .onEnded { _ in
-                                lastOffset = offset
-                            }
-                    )
-                // double tap to reset zoom
-                    .onTapGesture(count: 2) {
-                        withAnimation(.spring()) {
-                            scale = 1.0
-                            offset = .zero
-                            lastOffset = .zero
                         }
+                } else {
+                    ProgressView()
+                        .tint(.white)
+                        .frame(
+                            width: geo.size.width,
+                            height: geo.size.height
+                        )
+                }
+                
+                if !tags.isEmpty {
+                    VStack {
+                        Spacer()
+                        tagsView
                     }
-            } else {
-                ProgressView()
-                    .tint(.white)
-            }
-            
-            if !tags.isEmpty {
-                VStack {
-                    Spacer()
-                    tagsView
+                    .frame(
+                        width: geo.size.width,
+                        height: geo.size.height
+                    )
                 }
             }
+            .frame(
+                width: geo.size.width,
+                height: geo.size.height
+            )
         }
+        .ignoresSafeArea()
         .onAppear {
             loader.loadImage(targetSize: PHImageManagerMaximumSize)
         }
