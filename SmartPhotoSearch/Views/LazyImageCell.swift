@@ -61,6 +61,9 @@ struct LazyImageCell: View {
                     .opacity(isSelectionMode ? 0 : 1)
                 selectionOverlay(size: size)
             }
+            .frame(width: size, height: size)
+            .clipped()
+            .contentShape(Rectangle())
             .onAppear {
                 loader.loadImage(targetSize: targetSize)
             }
@@ -131,6 +134,28 @@ struct LazyImageCell: View {
                         .font(.caption2.bold())
                         .foregroundStyle(.white)
                 }
+            }
+        case .tagging:
+            ZStack {
+                Color.black.opacity(0.4)
+                VStack(spacing: 4) {
+                    ProgressView()
+                        .tint(.white)
+                    Text("Tagging...")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.white)
+                }
+            }
+        case .done, .tagged:
+            VStack {
+                HStack {
+                    Spacer()
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                        .background(Color.white.clipShape(Circle()))
+                        .padding(4)
+                }
+                Spacer()
             }
         case .done:
             VStack {

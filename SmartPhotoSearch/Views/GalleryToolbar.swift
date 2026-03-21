@@ -10,7 +10,7 @@ import SwiftUI
 
 struct GalleryToolbar: ToolbarContent {
     @ObservedObject var viewModel: GalleryViewModel
-
+    
     var body: some ToolbarContent {
         // Left — cancel selection
         ToolbarItem(placement: .topBarLeading) {
@@ -20,7 +20,7 @@ struct GalleryToolbar: ToolbarContent {
                 }
             }
         }
-
+        
         // Right — context sensitive
         ToolbarItem(placement: .topBarTrailing) {
             if viewModel.isSelectionMode {
@@ -35,13 +35,24 @@ struct GalleryToolbar: ToolbarContent {
                 }
                 .disabled(viewModel.selectedAssetIDs.isEmpty)
             } else {
-                Button {
-                    viewModel.uploadAll()
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "icloud.and.arrow.up")
-                        Text("Upload All")
-                            .font(.footnote.bold())
+                HStack {
+                    Button {
+                        viewModel.tagAll()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "tag")
+                            Text("Tag All")
+                                .font(.footnote.bold())
+                        }
+                    }
+                    Button {
+                        viewModel.uploadAll()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "icloud.and.arrow.up")
+                            Text("Upload All")
+                                .font(.footnote.bold())
+                        }
                     }
                 }
             }

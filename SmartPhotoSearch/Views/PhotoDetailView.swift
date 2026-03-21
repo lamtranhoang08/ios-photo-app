@@ -10,6 +10,7 @@ import Photos
 
 struct PhotoDetailView: View {
     let asset: PHAsset
+    let tags: [ImageTag]
     @StateObject private var loader: LazyImageLoader
     @Environment(\.dismiss) private var dismiss
     
@@ -19,8 +20,9 @@ struct PhotoDetailView: View {
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
     
-    init(asset: PHAsset) {
+    init(asset: PHAsset, tags:[ImageTag]) {
         self.asset = asset
+        self.tags = tags
         _loader = StateObject(wrappedValue: LazyImageLoader(asset: asset))
     }
     
@@ -80,6 +82,13 @@ struct PhotoDetailView: View {
                 ProgressView()
                     .tint(.white)
             }
+            
+            if !tags.isEmpty {
+                VStack {
+                    Spacer()
+                    tagsView
+                }
+            }
         }
         .onAppear {
             loader.loadImage(targetSize: PHImageManagerMaximumSize)
@@ -100,5 +109,34 @@ struct PhotoDetailView: View {
         }
         .navigationBarBackButtonHidden(true)
         .toolbarBackground(.hidden, for: .navigationBar)
+    }
+    
+    // Scrollable tag chips
+    @ViewBuilder
+    private var tagsView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(tags) { tag in
+                    Text(tag.displayText)
+                        .font(.caption.bold())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule()
+                                .fill(Color.blue.opacity(0.7))
+                        )
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        .background(
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.6)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 }

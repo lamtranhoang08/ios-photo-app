@@ -21,15 +21,22 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
     @Published var uploadStatuses: [String: UploadStatus] = [:]
     @Published var isSelectionMode: Bool = false
     @Published var selectedAssetIDs: Set<String> = []
+    @Published var tags: [String: [ImageTag]] = [:]  // assetID → tags
     
     private let photoService: PhotoLibraryServiceProtocol
     private let uploadService: UploadServiceProtocol
+    private let visionService: VisionServiceProtocol
+    private let tagRepository: TagRepositoryProtocol
     
     init(photoService: PhotoLibraryServiceProtocol = PhotoLibraryService(),
-         uploadService: UploadServiceProtocol = UploadService()
+         uploadService: UploadServiceProtocol = UploadService(),
+         visionService: VisionServiceProtocol = VisionService(),
+         tagRepository: TagRepositoryProtocol = TagRepository()
     ) {
         self.photoService = photoService
         self.uploadService = uploadService
+        self.visionService = visionService
+        self.tagRepository = tagRepository
         super.init()
         PHPhotoLibrary.shared().register(self)
     }
@@ -52,10 +59,12 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
             isLimited = false
             loadAssets()
             syncUploadStatuses()
+            syncTags()
         case .limited:
             isLimited = true
             loadAssets()
             syncUploadStatuses()
+            syncTags()
         case .notDetermined:
             photoService.requestPhotoPermission { [weak self] granted in
                 if granted { self?.loadPhotos() }
@@ -100,11 +109,6 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
         }
     }
     
-    func reloadAfterLimitedExpansion() {
-        isLimited = false
-        loadAssets()
-    }
-    
     func uploadAll() {
         // Only upload assets that haven't been uploaded yet
         let pending = assets.filter { asset in
@@ -141,6 +145,7 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
                     switch result {
                     case .success(let url):
                         self?.uploadStatuses[id] = .done(downloadURL: url)
+                        self?.tagAsset(asset)
                     case .failure(let error):
                         print("Upload failed for \(id): \(error.localizedDescription)")
                         self?.uploadStatuses[id] = .failed(error: error.localizedDescription)
@@ -148,6 +153,86 @@ class GalleryViewModel : NSObject, ObservableObject, PHPhotoLibraryChangeObserve
                 }
             }
         )
+    }
+    
+    func tagAll() {
+        let untagged = assets.filter { tags[$0.localIdentifier] == nil }
+        for asset in untagged {
+            tagAsset(asset)
+        }
+    }
+    
+    func tagAsset(_ asset: PHAsset) {
+        let id = asset.localIdentifier
+        
+        Task { @MainActor in
+            // only tag if upload is done
+            if case .done(let url) = self.uploadStatuses[id] {
+                self.uploadStatuses[id] = .tagging
+                self.performTagging(asset: asset, id: id, downloadURL: url)
+            }
+        }
+    }
+    
+    private func performTagging(asset: PHAsset, id: String, downloadURL: String) {
+        visionService.classifyImage(from: asset) { [weak self] result in
+            guard let self else { return }
+            
+            switch result {
+            case .success(let imageTags):
+                self.tagRepository.saveTags(imageTags, for: id)
+                Task { @MainActor in
+                    self.tags[id] = imageTags
+                    self.uploadStatuses[id] = .tagged(downloadURL: downloadURL)
+                    print("Tagged: \(imageTags.prefix(3).map(\.identifier))")
+                }
+                
+            case .failure(let error):
+                print("Tagging failed: \(error.localizedDescription)")
+                // Fall back to .done — upload succeeded even if tagging failed
+                Task { @MainActor in
+                    self.uploadStatuses[id] = .done(downloadURL: downloadURL)
+                }
+            }
+        }
+    }
+    
+    func syncTags() {
+        let db = Firestore.firestore()
+        
+        db.collection("photos").getDocuments { [weak self] snapshot, error in
+            guard let self else { return }
+            
+            if let error {
+                print("Failed to sync tags: \(error.localizedDescription)")
+                return
+            }
+            
+            Task { @MainActor in
+                snapshot?.documents.forEach { doc in
+                    let assetID = doc.data()["localIdentifier"] as? String ?? ""
+                    guard !assetID.isEmpty else { return }
+                    
+                    let tagArray = doc.data()["tags"] as? [[String: Any]] ?? []
+                    let tags = tagArray.compactMap { dict -> ImageTag? in
+                        guard
+                            let identifier = dict["identifier"] as? String,
+                            let confidence = dict["confidence"] as? Double
+                        else { return nil }
+                        return ImageTag(identifier: identifier, confidence: Float(confidence))
+                    }
+                    
+                    if !tags.isEmpty {
+                        self.tags[assetID] = tags
+                    }
+                }
+            }
+        }
+    }
+    
+    func reloadAfterLimitedExpansion() {
+        isLimited = false
+        loadAssets()
     }
     
     func toggleSelectionMode() {

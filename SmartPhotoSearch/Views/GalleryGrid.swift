@@ -70,11 +70,11 @@ struct GalleryGrid: View {
                     }
                 }
         )
-//        .navigationDestination(for: PHAsset.self) { asset in
-//            PhotoDetailView(asset: asset)
-//        }
         .navigationDestination(item: $selectedAsset) { asset in
-                   PhotoDetailView(asset: asset)
+            PhotoDetailView(
+                asset: asset,
+                tags: viewModel.tags[asset.localIdentifier] ?? []
+            )
         }
     }
 }
