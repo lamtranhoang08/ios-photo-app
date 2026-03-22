@@ -5,14 +5,31 @@
 //  Created by TranHoangLam on 18/3/26.
 //
 
-
 import SwiftUI
 
+/// Context-sensitive toolbar for the gallery.
+///
+/// Normal mode:    [Tag All] [Upload All]
+/// Selection mode: [Cancel]  [Upload (n)]
+///
+/// Designed as a ToolbarContent so it can be injected
+/// via .toolbar {} without polluting ContentView's body.
 struct GalleryToolbar: ToolbarContent {
+
+    // MARK: - Dependencies
     @ObservedObject var viewModel: GalleryViewModel
-    
+
+    // MARK: - Body
     var body: some ToolbarContent {
-        // Left — cancel selection
+        leadingItem
+        trailingItem
+    }
+
+    // MARK: - Leading
+
+    /// Cancel button — only visible in selection mode.
+    /// Clears selection and exits multi-select.
+    private var leadingItem: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
             if viewModel.isSelectionMode {
                 Button("Cancel") {
@@ -20,40 +37,60 @@ struct GalleryToolbar: ToolbarContent {
                 }
             }
         }
-        
-        // Right — context sensitive
+    }
+
+    // MARK: - Trailing
+
+    /// Context-sensitive right side:
+    /// - Selection mode: Upload selected photos (disabled when nothing selected)
+    /// - Normal mode: Tag All + Upload All
+    private var trailingItem: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
             if viewModel.isSelectionMode {
-                Button {
-                    viewModel.uploadSelected()
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "icloud.and.arrow.up")
-                        Text("Upload (\(viewModel.selectedAssetIDs.count))")
-                            .font(.footnote.bold())
-                    }
-                }
-                .disabled(viewModel.selectedAssetIDs.isEmpty)
+                uploadSelectedButton
             } else {
-                HStack {
-                    Button {
-                        viewModel.tagAll()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "tag")
-                            Text("Tag All")
-                                .font(.footnote.bold())
-                        }
-                    }
-                    Button {
-                        viewModel.uploadAll()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "icloud.and.arrow.up")
-                            Text("Upload All")
-                                .font(.footnote.bold())
-                        }
-                    }
+                normalModeButtons
+            }
+        }
+    }
+
+    /// Uploads only the currently selected photos.
+    /// Disabled when no photos are selected.
+    private var uploadSelectedButton: some View {
+        Button {
+            viewModel.uploadSelected()
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "icloud.and.arrow.up")
+                Text("Upload (\(viewModel.selectedAssetIDs.count))")
+                    .font(.footnote.bold())
+            }
+        }
+        .disabled(viewModel.selectedAssetIDs.isEmpty)
+    }
+
+    /// Tag All and Upload All buttons shown in normal browsing mode.
+    /// Tag All triggers on-device Vision classification for untagged assets.
+    /// Upload All skips already-uploaded assets automatically.
+    private var normalModeButtons: some View {
+        HStack {
+            Button {
+                viewModel.tagAll()
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "tag")
+                    Text("Tag All")
+                        .font(.footnote.bold())
+                }
+            }
+
+            Button {
+                viewModel.uploadAll()
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "icloud.and.arrow.up")
+                    Text("Upload All")
+                        .font(.footnote.bold())
                 }
             }
         }

@@ -7,10 +7,18 @@
 
 import SwiftUI
 
+/// A banner shown when the user has granted limited photo library access.
+/// Prompts the user to expand their selection via Apple's native photo picker.
+/// Only visible when `viewModel.isLimited` is true.
 struct LimitedAccessBanner: View {
+
+    // MARK: - Dependencies
     @ObservedObject var viewModel: GalleryViewModel
+
+    /// Controls presentation of the limited photo picker sheet.
     @Binding var isPresentingLimitedPicker: Bool
 
+    // MARK: - Body
     var body: some View {
         if viewModel.isLimited {
             VStack(spacing: 0) {
@@ -28,6 +36,7 @@ struct LimitedAccessBanner: View {
 
                     Spacer()
 
+                    // Triggers Apple's native limited photo picker
                     Button("Expand") {
                         isPresentingLimitedPicker = true
                     }
