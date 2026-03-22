@@ -12,7 +12,7 @@ struct GalleryGrid: View {
     @ObservedObject var viewModel: GalleryViewModel
     
     @State private var columnsCount: Int = 3
-    @State private var selectedAsset: PHAsset? = nil
+    @State private var selectedIndex: Int? = nil
     
     let minColumns: Int = 1
     let maxColumns: Int = 6
@@ -27,7 +27,7 @@ struct GalleryGrid: View {
                 ),
                 spacing: spacing
             ) {
-                ForEach(viewModel.assets, id: \.localIdentifier) { asset in
+                ForEach(Array(viewModel.assets.enumerated()), id: \.element.localIdentifier) { index, asset in
                     let isUploaded = viewModel.uploadStatuses[asset.localIdentifier]?.isUploaded ?? false
                     
                     LazyImageCell(
@@ -42,7 +42,7 @@ struct GalleryGrid: View {
                                 viewModel.toggleSelection(for: asset)
                             } else {
                                 // normal mode — open detail view
-                                selectedAsset = asset
+                                selectedIndex = index
                             }
                         },
                         onLongPress: {
@@ -70,10 +70,11 @@ struct GalleryGrid: View {
                     }
                 }
         )
-        .navigationDestination(item: $selectedAsset) { asset in
+        .navigationDestination(item: $selectedIndex) { index in
             PhotoDetailView(
-                asset: asset,
-                tags: viewModel.tags[asset.localIdentifier] ?? []
+                assets: viewModel.assets,
+                initialIndex: index,
+                tagsMap: viewModel.tags
             )
         }
     }
