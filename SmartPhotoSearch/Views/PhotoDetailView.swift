@@ -61,14 +61,13 @@ struct PhotoDetailView: View {
                             showInfo: $showInfo
                         )
                         .tag(index)
-                        // Apply dismiss animations to each page
                         .offset(y: dragOffset.height)
                         .scaleEffect(dismissScale)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .onChange(of: currentIndex) { _, _ in
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.85)) {
                         showInfo = false
                     }
                 }
@@ -96,10 +95,10 @@ struct PhotoDetailView: View {
         .gesture(
             DragGesture(minimumDistance: 30)
                 .onChanged { value in
-                    // Only activate for clearly vertical gestures.
-                    // Horizontal gestures pass through to TabView.
-                    guard abs(value.translation.height) > abs(value.translation.width) * 1.5
-                    else { return }
+                    let isVertical = abs(value.translation.height) > abs(value.translation.width) * 1.2
+                    let passedThreshold = abs(value.translation.height) > 10
+                    guard isVertical && passedThreshold else { return }
+                    
                     guard !showInfo else { return }
                     dragOffset = value.translation
                 }
@@ -110,7 +109,6 @@ struct PhotoDetailView: View {
                     let shouldDismiss = abs(dragOffset.height) > 100 || velocity > 300
                     
                     if shouldDismiss {
-                        // Animate off screen then dismiss
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             dragOffset = CGSize(
                                 width: dragOffset.width,
@@ -122,7 +120,7 @@ struct PhotoDetailView: View {
                         }
                     } else {
                         // Snap back — user didn't drag far enough
-                        withAnimation(.spring()) {
+                        withAnimation(.interactiveSpring()) {
                             dragOffset = .zero
                         }
                     }
@@ -148,32 +146,32 @@ struct PhotoDetailView: View {
     
     // MARK: - Bottom Toolbar
     /// Info and delete actions — always visible above home indicator.
-        /// .safeAreaInset handles safe area automatically on all devices.
-        private var bottomToolbar: some View {
-            HStack {
-                // Info
-                Button {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        showInfo.toggle()
-                    }
-                } label: {
-                    Image(systemName: showInfo ? "info.circle.fill" : "info.circle")
-                        .font(.title2)
-                        .foregroundStyle(.white)
+    /// .safeAreaInset handles safe area automatically on all devices.
+    private var bottomToolbar: some View {
+        HStack {
+            // Info
+            Button {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    showInfo.toggle()
                 }
-                Spacer()
-
-                // Delete (placeholder for future)
-                Button {
-                    // TODO: Milestone 5 — implement delete
-                } label: {
-                    Image(systemName: "trash")
-                        .font(.title2)
-                        .foregroundStyle(.white)
-                }
+            } label: {
+                Image(systemName: showInfo ? "info.circle.fill" : "info.circle")
+                    .font(.title2)
+                    .foregroundStyle(.white)
             }
-            .padding(.horizontal, 32)
-            .padding(.vertical, 12)
-            .background(.ultraThinMaterial)
+            Spacer()
+            
+            // Delete (placeholder for future)
+            Button {
+                // TODO: Milestone 5 — implement delete
+            } label: {
+                Image(systemName: "trash")
+                    .font(.title2)
+                    .foregroundStyle(.white)
+            }
         }
+        .padding(.horizontal, 32)
+        .padding(.vertical, 12)
+        .background(.ultraThinMaterial)
+    }
 }
