@@ -95,14 +95,12 @@ class GalleryViewModel: NSObject, ObservableObject, PHPhotoLibraryChangeObserver
         case .authorized:
             isLimited = false
             loadAssets()
-            syncUploadStatuses()
-            syncTags()
+            syncFromFirestore()
 
         case .limited:
             isLimited = true
             loadAssets()
-            syncUploadStatuses()
-            syncTags()
+            syncFromFirestore()
 
         case .notDetermined:
             photoService.requestPhotoPermission { [weak self] granted in
@@ -230,47 +228,31 @@ class GalleryViewModel: NSObject, ObservableObject, PHPhotoLibraryChangeObserver
     // MARK: - Firestore Sync
     // TODO: Move both sync methods to a PhotoRepository in Milestone 3
     // Currently accessing Firestore directly from ViewModel for simplicity
-
-    /// Restores upload statuses from Firestore on app launch.
-    /// Prevents already-uploaded photos from appearing as unuploaded
-    /// after a fresh install or cache clear.
-    func syncUploadStatuses() {
+    
+    /// Single Firestore query that restores both upload statuses and tags on launch.
+    /// Replaces two separate network calls — halves Firestore reads on app start.
+    /// TODO: Move to PhotoRepository in Milestone 3
+    func syncFromFirestore() {
         Firestore.firestore().collection("photos").getDocuments { [weak self] snapshot, error in
             guard let self else { return }
-
+            
             if let error {
-                print("syncUploadStatuses failed: \(error.localizedDescription)")
+                print("sync failed: \(error.localizedDescription)")
                 return
             }
-
+            
             Task { @MainActor in
                 snapshot?.documents.forEach { doc in
-                    let assetID = doc.data()["localIdentifier"] as? String
-                        ?? doc.documentID.replacingOccurrences(of: "_", with: "/")
-                    let downloadURL = doc.data()["downloadURL"] as? String ?? ""
-                    self.uploadStatuses[assetID] = .done(downloadURL: downloadURL)
-                }
-            }
-        }
-    }
-
-    /// Restores Vision tags from Firestore on app launch.
-    /// Ensures PhotoDetailView shows tags without re-running classification.
-    func syncTags() {
-        Firestore.firestore().collection("photos").getDocuments { [weak self] snapshot, error in
-            guard let self else { return }
-
-            if let error {
-                print("syncTags failed: \(error.localizedDescription)")
-                return
-            }
-
-            Task { @MainActor in
-                snapshot?.documents.forEach { doc in
-                    guard let assetID = doc.data()["localIdentifier"] as? String,
+                    let data = doc.data()
+                    
+                    // restore upload status
+                    guard let assetID = data["localIdentifier"] as? String,
                           !assetID.isEmpty else { return }
-
-                    let tagArray = doc.data()["tags"] as? [[String: Any]] ?? []
+                    let downloadURL = data["downloadURL"] as? String ?? ""
+                    self.uploadStatuses[assetID] = .done(downloadURL: downloadURL)
+                        
+                    // restore tags if present
+                    let tagArray = data["tags"] as? [[String: Any]] ?? []
                     let imageTags = tagArray.compactMap { dict -> ImageTag? in
                         guard
                             let identifier = dict["identifier"] as? String,
@@ -278,7 +260,6 @@ class GalleryViewModel: NSObject, ObservableObject, PHPhotoLibraryChangeObserver
                         else { return nil }
                         return ImageTag(identifier: identifier, confidence: Float(confidence))
                     }
-
                     if !imageTags.isEmpty {
                         self.tags[assetID] = imageTags
                     }
