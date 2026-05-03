@@ -82,7 +82,9 @@ struct GalleryGrid: View {
             PhotoDetailView(
                 assets: viewModel.assets,
                 initialIndex: index,
-                tagsMap: viewModel.tags
+                tagsMap: viewModel.tags,
+                uploadStatuses: viewModel.uploadStatuses,
+                onUpload: { asset in viewModel.uploadAsset(asset)}
             )
         }
     }

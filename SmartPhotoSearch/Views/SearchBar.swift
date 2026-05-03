@@ -14,6 +14,7 @@ struct SearchBar: View {
     @Binding var text: String
     @Binding var isSearching: Bool
     var placeholder: String = "Search photos..."
+    var onCommit: ((String) -> Void)? = nil
     
     @FocusState private var isFocused: Bool
     
@@ -27,7 +28,10 @@ struct SearchBar: View {
                     .focused($isFocused)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
-                    .onSubmit { isSearching = true }
+                    .onSubmit {
+                        isFocused = false
+                        onCommit?(text) // Save to history on commit
+                    }
                 
                 // Clear button
                 if !text.isEmpty {
@@ -58,7 +62,7 @@ struct SearchBar: View {
         }
         .animation(.easeInOut(duration: 0.2), value: isSearching)
         .onChange(of: isFocused) { _, focused in
-            if focused { isSearching = true }
+            if focused { isSearching = focused }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

@@ -58,7 +58,7 @@ class GalleryViewModel: NSObject, ObservableObject, PHPhotoLibraryChangeObserver
     // MARK: - Init
     init(
         photoService: PhotoLibraryServiceProtocol = PhotoLibraryService(),
-        uploadService: UploadServiceProtocol = UploadService(),
+        uploadService: UploadServiceProtocol = UploadService.shared,
         visionService: VisionServiceProtocol = VisionService(),
         tagRepository: TagRepositoryProtocol = TagRepository()
     ) {

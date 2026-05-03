@@ -55,11 +55,13 @@ class ImageExtractor: ImageExtractorProtocol {
             targetSize: targetSize,
             contentMode: .aspectFit,
             options: options
-        ) { image, _ in
+        ) { image, info in
+            if let cancelled = info?[PHImageCancelledKey] as? Bool, cancelled { return }
             if let image {
                 completion(.success(image))
             } else {
-                completion(.failure(ImageExtractorError.extractionFailed))
+                let error = info?[PHImageErrorKey] as? Error
+                completion(.failure(error ?? ImageExtractorError.extractionFailed))
             }
         }
     }

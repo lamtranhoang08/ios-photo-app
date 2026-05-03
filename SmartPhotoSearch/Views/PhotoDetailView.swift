@@ -16,6 +16,8 @@ struct PhotoDetailView: View {
     let assets: [PHAsset]
     let initialIndex: Int
     let tagsMap: [String: [ImageTag]]
+    let uploadStatuses: [String: UploadStatus]
+    let onUpload: ((PHAsset) -> Void)?
     
     @Environment(\.dismiss) private var dismiss
     @State private var currentIndex: Int
@@ -25,11 +27,19 @@ struct PhotoDetailView: View {
     @State private var showInfo: Bool = false
     
     // MARK: - Init
-    init(assets: [PHAsset], initialIndex: Int, tagsMap: [String: [ImageTag]] = [:]) {
+    init(
+        assets: [PHAsset],
+        initialIndex: Int,
+        tagsMap: [String: [ImageTag]] = [:],
+        uploadStatuses: [String: UploadStatus] = [:],
+        onUpload: ((PHAsset) -> Void)? = nil
+    ) {
         self.assets = assets
         self.initialIndex = initialIndex
         self.tagsMap = tagsMap
         self._currentIndex = State(initialValue: initialIndex)
+        self.uploadStatuses = uploadStatuses
+        self.onUpload = onUpload
     }
     
     // MARK: - Dismiss Animations
@@ -159,6 +169,60 @@ struct PhotoDetailView: View {
                     .font(.title2)
                     .foregroundStyle(.white)
             }
+            Spacer()
+            
+            // Upload button — only shown when asset is not yet uploaded
+            if currentIndex < assets.count {
+                let asset = assets[currentIndex]
+                let status = uploadStatuses[asset.localIdentifier]
+                
+                switch status {
+                case .uploading(let progress):
+                    // Show progress instead of button while uploading
+                    VStack(spacing: 2) {
+                        ProgressView(value: progress)
+                            .progressViewStyle(.linear)
+                            .tint(.white)
+                            .frame(width: 60)
+                        Text("\(Int(progress * 100))%")
+                            .font(.caption2)
+                            .foregroundStyle(.white)
+                    }
+                    
+                case .tagging:
+                    HStack(spacing: 4) {
+                        ProgressView().tint(.white).scaleEffect(0.7)
+                        Text("Tagging...")
+                            .font(.caption2)
+                            .foregroundStyle(.white)
+                    }
+                    
+                case .done, .tagged:
+                    Image(systemName: "checkmark.icloud.fill")
+                        .font(.title2)
+                        .foregroundStyle(.green)
+                    
+                case .failed:
+                    // Allow retry on failure
+                    Button {
+                        onUpload?(asset)
+                    } label: {
+                        Image(systemName: "exclamationmark.icloud.fill")
+                            .font(.title2)
+                            .foregroundStyle(.red)
+                    }
+                    
+                case .pending, .none:
+                    Button {
+                        onUpload?(asset)
+                    } label: {
+                        Image(systemName: "icloud.and.arrow.up")
+                            .font(.title2)
+                            .foregroundStyle(.white)
+                    }
+                }
+            }
+            
             Spacer()
             
             // Delete (placeholder for future)

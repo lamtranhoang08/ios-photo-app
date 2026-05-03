@@ -8,6 +8,7 @@
 import Foundation
 import Photos
 
+
 // MARK: - Protocol
 
 /// Abstraction over the full upload pipeline.
@@ -30,6 +31,9 @@ protocol UploadServiceProtocol {
 /// Kept intentionally thin — all transport logic lives in BackgroundUploadService.
 /// This makes it easy to swap storage backends (S3, Cloudinary) without touching callers.
 class UploadService: UploadServiceProtocol {
+    
+    // MARK: - Singleton
+    static let shared = UploadService()
     
     // MARK: - Dependencies
     private let backgroundUploadService: BackgroundUploadServiceProtocol
@@ -54,7 +58,10 @@ class UploadService: UploadServiceProtocol {
         onComplete: @escaping (Result<String, Error>) -> Void
     ) {
         imageExtractor.extractData(from: asset) { [weak self] result in
-            guard let self else { return }
+            guard let self else {
+                print("UploadService deallocated before extraction completed")
+                return
+            }
             switch result {
             case .failure(let error):
                 onComplete(.failure(error))

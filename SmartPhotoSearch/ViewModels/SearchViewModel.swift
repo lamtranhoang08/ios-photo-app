@@ -23,12 +23,17 @@ class SearchViewModel: ObservableObject {
     @Published var query: String = ""
     @Published var results: [PHAsset] = []
     @Published var isSearching: Bool = false
+    @Published var history: [String] = []
     
     private var cancellables = Set<AnyCancellable>()
+    private var historyService = SearchHistoryService()
     
     // MARK: - Init
     init(assets: Published<[PHAsset]>.Publisher,
          tags: Published<[String: [ImageTag]]>.Publisher) {
+        
+        // Load persisted history on init
+        history = historyService.load()
         
         // Combine latest assets + tags + query
         // Debounce query to avoid searching on every keystroke
@@ -79,5 +84,28 @@ class SearchViewModel: ObservableObject {
         return scored
             .sorted { $0.score > $1.score }
             .map { $0.asset }
+    }
+    
+    // MARK: - History
+    
+    /// Call when user submits a search
+    /// Saves query to history and persists it
+    func commitSearch(_ query: String) {
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        historyService.add(trimmed)
+        history = historyService.load()
+    }
+    
+    /// Removes a single history entry
+    func removeHistory(_ query: String) {
+        historyService.remove(query)
+        history = historyService.load()
+    }
+    
+    /// Clears all history entries
+    func clearHistory() {
+        historyService.clearAll()
+        history = []
     }
 }
