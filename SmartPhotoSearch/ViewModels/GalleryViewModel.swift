@@ -54,18 +54,21 @@ class GalleryViewModel: NSObject, ObservableObject, PHPhotoLibraryChangeObserver
     private let uploadService: UploadServiceProtocol
     private let visionService: VisionServiceProtocol
     private let tagRepository: TagRepositoryProtocol
+    private let deleteService: DeleteServiceProtocol
 
     // MARK: - Init
     init(
         photoService: PhotoLibraryServiceProtocol = PhotoLibraryService(),
         uploadService: UploadServiceProtocol = UploadService.shared,
         visionService: VisionServiceProtocol = VisionService(),
-        tagRepository: TagRepositoryProtocol = TagRepository()
+        tagRepository: TagRepositoryProtocol = TagRepository(),
+        deleteService: DeleteServiceProtocol = DeleteService.shared
     ) {
         self.photoService = photoService
         self.uploadService = uploadService
         self.visionService = visionService
         self.tagRepository = tagRepository
+        self.deleteService = deleteService
         super.init()
         PHPhotoLibrary.shared().register(self)
     }
@@ -177,6 +180,46 @@ class GalleryViewModel: NSObject, ObservableObject, PHPhotoLibraryChangeObserver
                 }
             }
         )
+    }
+    
+    // MARK: - Delete
+    
+    /// Delets a single asset from device and Firebase
+    func deleteAsset(_ asset: PHAsset, onComplete: ((Result<Void, Error>) -> Void)? = nil) {
+        let id = asset.localIdentifier
+        deleteService.delete(assetIDs: [id], assets: [asset]) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                self.uploadStatuses.removeValue(forKey: id)
+                self.tags.removeValue(forKey: id)
+                // Asset list updates automatically via PHPhotoLibraryChangeObserver
+            case .failure(let error):
+                print("Delete failed [\(id)]: \(error.localizedDescription)")
+            }
+            onComplete?(result)
+        }
+    }
+    
+    /// Deletes all currently selected assets, then exits selection mode
+    func deleteSelected(onComplete: ((Result<Void, Error>) -> Void)? = nil) {
+        let selectedAssets = assets.filter { selectedAssetIDs.contains($0.localIdentifier) }
+        let selectedIDs = selectedAssets.map { $0.localIdentifier }
+
+        deleteService.delete(assetIDs: selectedIDs, assets: selectedAssets) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                selectedIDs.forEach {
+                    self.uploadStatuses.removeValue(forKey: $0)
+                    self.tags.removeValue(forKey: $0)
+                }
+                self.toggleSelectionMode()
+            case .failure(let error):
+                print("Bulk delete failed: \(error.localizedDescription)")
+            }
+            onComplete?(result)
+        }
     }
 
     // MARK: - Tagging

@@ -6,90 +6,7 @@
 //
 
 import SwiftUI
-
-//struct ContentView: View {
-//    @StateObject private var viewModel = GalleryViewModel()
-//    @StateObject private var searchViewModel: SearchViewModel
-//    @State private var isPresentingLimitedPicker: Bool = false
-//    
-////    init() {
-////        let galleryVM = GalleryViewModel()
-////        _viewModel = StateObject(wrappedValue: galleryVM)
-////        _searchViewModel = StateObject(wrappedValue: SearchViewModel(assets: galleryVM.$assets, tags: galleryVM.$tags))
-////    }
-//    
-//    var body: some View {
-//        NavigationStack {
-//            VStack(spacing: 0) {
-//                SearchBar(
-//                    text: $searchViewModel.query,
-//                    isSearching: $searchViewModel.isSearching,
-//                    onCommit: {
-//                        query in searchViewModel.commitSearch(query)
-//                    }
-//                )
-//                
-//                LimitedAccessBanner(
-//                    viewModel: viewModel,
-//                    isPresentingLimitedPicker: $isPresentingLimitedPicker
-//                )
-//                
-//                ZStack {
-//                    GalleryGrid(viewModel: viewModel)
-//                    
-//                    if searchViewModel.isSearching {
-//                        Color(.systemBackground) // blocks interaction with grid behind
-//                            .ignoresSafeArea()
-//                        
-//                        if searchViewModel.query.isEmpty {
-//                            SearchHistoryView(
-//                                history: searchViewModel.history,
-//                                onSelect: { query in
-//                                    searchViewModel.query = query
-//                                    searchViewModel.commitSearch(query)
-//                                },
-//                                onDelete: { query in
-//                                    searchViewModel.removeHistory(query)
-//                                },
-//                                onClearAll: {
-//                                    searchViewModel.clearHistory()
-//                                }
-//                            )
-//                        } else {
-//                            SearchResultsGrid(
-//                                assets: searchViewModel.results,
-//                                allTags: viewModel.tags,
-//                                uploadStatuses: viewModel.uploadStatuses
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//            .navigationTitle("SmartPhotoSearch")
-//            .navigationBarTitleDisplayMode(.inline)
-//            .toolbar {
-//                GalleryToolbar(viewModel: viewModel)
-//            }
-//            .onAppear {
-//                viewModel.loadPhotos()
-//            }
-//            .overlay {
-//                if viewModel.permissionDenied {
-//                    PermissionDeniedView()
-//                }
-//            }
-//            .background {
-//                LimitedPickerPresenter(isPresenting: $isPresentingLimitedPicker)
-//                    .frame(width: 0, height: 0)
-//            }
-//        }
-//    }
-//}
-//
-//#Preview {
-//    ContentView()
-//}
-//
+import Photos
 
 struct ContentView: View {
     @StateObject private var viewModel = GalleryViewModel()
@@ -104,6 +21,8 @@ struct ContentView: View {
 struct GalleryCoordinatorView: View {
     @ObservedObject var viewModel: GalleryViewModel
     @StateObject private var searchViewModel: SearchViewModel
+    @State private var isPresentingLimitedPicker = false
+    @State private var showDeleteConfirmation = false
 
     init(viewModel: GalleryViewModel) {
         self.viewModel = viewModel
@@ -126,7 +45,7 @@ struct GalleryCoordinatorView: View {
                     isPresentingLimitedPicker: $isPresentingLimitedPicker
                 )
                 ZStack {
-                    GalleryGrid(viewModel: viewModel)
+                    GalleryGrid(viewModel: viewModel, showDeleteConfirmation: $showDeleteConfirmation)
                     if searchViewModel.isSearching {
                         Color(.systemBackground).ignoresSafeArea()
                         if searchViewModel.query.isEmpty {
@@ -151,7 +70,11 @@ struct GalleryCoordinatorView: View {
             }
             .navigationTitle("SmartPhotoSearch")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { GalleryToolbar(viewModel: viewModel) }
+            .toolbar { GalleryToolbar(viewModel: viewModel)
+                {
+                    showDeleteConfirmation = true
+                }
+            }
             .onAppear { viewModel.loadPhotos() }
             .overlay {
                 if viewModel.permissionDenied { PermissionDeniedView() }
@@ -162,6 +85,4 @@ struct GalleryCoordinatorView: View {
             }
         }
     }
-
-    @State private var isPresentingLimitedPicker = false
 }

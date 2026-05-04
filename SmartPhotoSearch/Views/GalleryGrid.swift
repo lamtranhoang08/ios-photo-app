@@ -14,22 +14,24 @@ import Photos
 /// - Tap to open full-screen photo detail
 /// - Upload and selection state overlays per cell
 struct GalleryGrid: View {
-
+    
     // MARK: - Dependencies
     @ObservedObject var viewModel: GalleryViewModel
-
+    
     // MARK: - Grid State
     /// Current number of columns. Adjusted by pinch gesture.
     @State private var columnsCount: Int = 3
-
+    
     /// Index of the tapped photo. Setting this triggers navigation to PhotoDetailView.
     @State private var selectedIndex: Int? = nil
-
+    
+    @Binding var showDeleteConfirmation: Bool
+    
     // MARK: - Constants
     let minColumns: Int = 1
     let maxColumns: Int = 6
     let spacing: CGFloat = 2
-
+    
     // MARK: - Body
     var body: some View {
         ScrollView {
@@ -45,7 +47,7 @@ struct GalleryGrid: View {
                     id: \.element.localIdentifier
                 ) { index, asset in
                     let isUploaded = viewModel.uploadStatuses[asset.localIdentifier]?.isUploaded ?? false
-
+                    
                     LazyImageCell(
                         asset: asset,
                         uploadStatus: viewModel.uploadStatuses[asset.localIdentifier],
@@ -78,19 +80,32 @@ struct GalleryGrid: View {
                     }
                 }
         )
+        .confirmationDialog(
+            "Delete \(viewModel.selectedAssetIDs.count) Photo(s)?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete from Device & Cloud", role: .destructive) {
+                viewModel.deleteSelected()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete the selected photos from your device and cloud storage.")
+        }
         .navigationDestination(item: $selectedIndex) { index in
             PhotoDetailView(
                 assets: viewModel.assets,
                 initialIndex: index,
                 tagsMap: viewModel.tags,
                 uploadStatuses: viewModel.uploadStatuses,
-                onUpload: { asset in viewModel.uploadAsset(asset)}
+                onUpload: { asset in viewModel.uploadAsset(asset) },
+                onDelete: { asset in viewModel.deleteAsset(asset) }
             )
         }
     }
-
+    
     // MARK: - Gesture Handlers
-
+    
     /// Handles cell tap based on current mode:
     /// - Selection mode: toggles selection (uploaded photos are not selectable)
     /// - Normal mode: opens photo detail view
@@ -102,7 +117,7 @@ struct GalleryGrid: View {
             selectedIndex = index
         }
     }
-
+    
     /// Long press enters selection mode and auto-selects the pressed cell.
     /// Uploaded photos cannot enter selection mode via long press.
     private func handleLongPress(on asset: PHAsset, isUploaded: Bool) {

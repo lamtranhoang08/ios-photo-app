@@ -18,9 +18,12 @@ struct PhotoDetailView: View {
     let tagsMap: [String: [ImageTag]]
     let uploadStatuses: [String: UploadStatus]
     let onUpload: ((PHAsset) -> Void)?
+    let onDelete: ((PHAsset) -> Void)?
     
     @Environment(\.dismiss) private var dismiss
     @State private var currentIndex: Int
+    @State private var showDeleteConfirmation = false
+    @State private var deleteError: String? = nil
     
     // Tracks vertical drag for swipe-to-dismiss
     @State private var dragOffset: CGSize = .zero
@@ -32,7 +35,8 @@ struct PhotoDetailView: View {
         initialIndex: Int,
         tagsMap: [String: [ImageTag]] = [:],
         uploadStatuses: [String: UploadStatus] = [:],
-        onUpload: ((PHAsset) -> Void)? = nil
+        onUpload: ((PHAsset) -> Void)? = nil,
+        onDelete: ((PHAsset) -> Void)? = nil
     ) {
         self.assets = assets
         self.initialIndex = initialIndex
@@ -40,6 +44,8 @@ struct PhotoDetailView: View {
         self._currentIndex = State(initialValue: initialIndex)
         self.uploadStatuses = uploadStatuses
         self.onUpload = onUpload
+        self.onDelete = onDelete
+        
     }
     
     // MARK: - Dismiss Animations
@@ -97,6 +103,29 @@ struct PhotoDetailView: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .zIndex(1)
             }
+        }
+        .confirmationDialog(
+            "Delete Photo?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete from Device and SmartPhotoSearch", role: .destructive) {
+                guard currentIndex < assets.count else { return }
+                let asset = assets[currentIndex]
+                onDelete?(asset)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete the photo from your device and SmartPhotoSearch")
+        }
+        .alert("Delete Failed", isPresented: .init(
+            get: { deleteError != nil },
+            set: { if !$0 { deleteError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(deleteError ?? "")
         }
         
         // Swipe-to-dismiss lives on the outer ZStack so it doesn't
@@ -227,7 +256,7 @@ struct PhotoDetailView: View {
             
             // Delete (placeholder for future)
             Button {
-                // TODO: Milestone 5 — implement delete
+                showDeleteConfirmation = true
             } label: {
                 Image(systemName: "trash")
                     .font(.title2)
