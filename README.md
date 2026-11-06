@@ -1,4 +1,4 @@
-# SmartPhotoSearch 📸
+# SmartPhotoSearch 
 
 A production-quality iOS photo management app built with SwiftUI and Firebase. SmartPhotoSearch allows users to browse, upload, and search their photo library with an intelligent, scalable architecture designed to FAANG engineering standards.
 
